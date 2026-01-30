@@ -1,0 +1,249 @@
+{
+  "dashboard": {
+    "title": "CalcBurst - Real-time Monitoring",
+    "tags": ["calcburst", "serverless", "aws"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate (TPM)",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(calcburst_requests_total[1m]) * 60",
+            "legendFormat": "Requests per minute",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Requests/min"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Request Latency (P50, P95, P99)",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(calcburst_request_latency_seconds_bucket[5m]))",
+            "legendFormat": "P50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(calcburst_request_latency_seconds_bucket[5m]))",
+            "legendFormat": "P95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(calcburst_request_latency_seconds_bucket[5m]))",
+            "legendFormat": "P99",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Latency"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 8, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "rate(calcburst_errors_total[5m])",
+            "legendFormat": "Errors/sec",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Errors/sec"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Active Requests",
+        "type": "graph",
+        "gridPos": {"x": 8, "y": 8, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "calcburst_active_requests",
+            "legendFormat": "Active",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Concurrent Requests"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Lambda Invocations",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 8, "w": 4, "h": 7},
+        "targets": [
+          {
+            "expr": "calcburst_lambda_invocations",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        }
+      },
+      {
+        "id": 6,
+        "title": "Lambda Duration (ms)",
+        "type": "stat",
+        "gridPos": {"x": 20, "y": 8, "w": 4, "h": 7},
+        "targets": [
+          {
+            "expr": "calcburst_lambda_duration_ms",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        }
+      },
+      {
+        "id": 7,
+        "title": "DynamoDB Operations",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 15, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(aws_dynamodb_successful_request_latency_sum[5m])",
+            "legendFormat": "Operations/sec",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Ops/sec"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 8,
+        "title": "API Gateway Requests",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 15, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "calcburst_api_requests",
+            "legendFormat": "Total Requests",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Requests"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Success Rate (%)",
+        "type": "gauge",
+        "gridPos": {"x": 0, "y": 23, "w": 6, "h": 6},
+        "targets": [
+          {
+            "expr": "(1 - (rate(calcburst_errors_total[5m]) / rate(calcburst_requests_total[5m]))) * 100",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 95, "color": "yellow"},
+                {"value": 99, "color": "green"}
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Total Calculations (24h)",
+        "type": "stat",
+        "gridPos": {"x": 6, "y": 23, "w": 6, "h": 6},
+        "targets": [
+          {
+            "expr": "increase(calcburst_requests_total[24h])",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        }
+      },
+      {
+        "id": 11,
+        "title": "Average Latency (ms)",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 23, "w": 6, "h": 6},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(calcburst_request_latency_seconds_bucket[5m])) * 1000",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms"
+          }
+        }
+      },
+      {
+        "id": 12,
+        "title": "System Health",
+        "type": "stat",
+        "gridPos": {"x": 18, "y": 23, "w": 6, "h": 6},
+        "targets": [
+          {
+            "expr": "up{job=\"calcburst-metrics\"}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "background"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"type": "value", "options": {"0": {"text": "DOWN", "color": "red"}}},
+              {"type": "value", "options": {"1": {"text": "UP", "color": "green"}}}
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+

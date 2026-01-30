@@ -1,0 +1,74 @@
+groups:
+  - name: calcburst_alerts
+    interval: 30s
+    rules:
+      - alert: HighErrorRate
+        expr: rate(calcburst_errors_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: lambda
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }} errors/sec for CalcBurst Lambda"
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(calcburst_request_latency_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          component: lambda
+        annotations:
+          summary: "High request latency detected"
+          description: "95th percentile latency is {{ $value }}s"
+
+      - alert: LambdaThrottling
+        expr: rate(calcburst_lambda_throttles[5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+          component: lambda
+        annotations:
+          summary: "Lambda function is being throttled"
+          description: "Throttle rate is {{ $value }} throttles/sec"
+
+      - alert: DynamoDBHighLatency
+        expr: aws_dynamodb_successful_request_latency_average > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: dynamodb
+        annotations:
+          summary: "DynamoDB high latency detected"
+          description: "Average latency is {{ $value }}ms"
+
+      - alert: APIGateway5xxErrors
+        expr: rate(aws_apigateway_5xx_error[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          component: api-gateway
+        annotations:
+          summary: "API Gateway 5xx errors detected"
+          description: "5xx error rate is {{ $value }} errors/sec"
+
+      - alert: LowThroughput
+        expr: rate(calcburst_requests_total[5m]) < 100
+        for: 10m
+        labels:
+          severity: info
+          component: lambda
+        annotations:
+          summary: "Low request throughput"
+          description: "Request rate is {{ $value }} req/sec (expected > 100)"
+
+      - alert: HighConcurrency
+        expr: calcburst_active_requests > 800
+        for: 5m
+        labels:
+          severity: warning
+          component: lambda
+        annotations:
+          summary: "High concurrent requests"
+          description: "Active requests: {{ $value }} (threshold: 800)"
+
