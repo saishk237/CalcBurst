@@ -367,5 +367,5 @@ For questions or support, please open an issue in the GitHub repository.
 
 ---
 
-**Built with** ❤️ **using AWS Serverless Technologies**
+**Built with** ❤️ **by Saish Kothawade**
 
